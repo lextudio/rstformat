@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rstformat"
+version = "0.1.0"
+description = "A formatter for reStructuredText files"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+dependencies = [
+    "tomli>=1.2; python_version<'3.11'",
+]
+
+[project.scripts]
+rstformat = "rstformat.cli:entry_point"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["rstformat"]
