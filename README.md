@@ -2,43 +2,96 @@
 
 A formatter for reStructuredText files.
 
+[![Become a Sponsor](https://img.shields.io/badge/Become%20a%20Sponsor-lextudio-orange.svg?style=for-readme)](https://github.com/sponsors/lextudio)
+[![PyPI](https://img.shields.io/pypi/v/rstformat.svg)](https://pypi.python.org/pypi/rstformat)
+[![PyPI Downloads](https://img.shields.io/pypi/dd/rstformat)](https://pypi.python.org/pypi/rstformat/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/rstformat.svg)](https://pypi.python.org/pypi/rstformat/)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/lextudio/rstformat/master/LICENSE)
+
+An open source and free formatter for reStructuredText (`.rst`) files, distributed under the MIT License.
+
+## Features
+
+| Feature | Setting |
+| ------- | ------- |
+| Trim trailing whitespace | `trim_trailing_whitespace` |
+| Output line ending (LF / CRLF / auto-detect) | `line_ending` |
+| Resize section adornments to title width | `normalize_section_underlines` |
+| Add/remove blank lines around headings | `normalize_section_spacing` |
+| Limit consecutive blank lines | `max_consecutive_blank_lines` |
+| Insert final newline | `insert_final_newline` |
+| East-Asian double-width character support | (implicit) |
+
+**Plugin system** for delegating embedded code-block formatting to language-specific tools:
+
+- Python code blocks → **Black** or **Ruff** formatter
+- Shell script blocks → **shfmt** formatter
+- SQL blocks → **sqlfluff** formatter (planned)
+
 ## Installation
+
+Install from PyPI:
 
 ```bash
 pip install rstformat
 ```
 
-Or with uv:
+Or with `uv`:
 
 ```bash
 uv tool install rstformat
 ```
 
-## Usage
+To enable optional features:
 
 ```bash
-# Format files in-place
-rstformat file.rst
+pip install rstformat[editorconfig]  # Honor .editorconfig settings
+pip install rstformat[lint]          # Pre-flight validation via docutils/rstcheck
+pip install rstformat[dev]           # Development dependencies (tests, ruff)
+```
 
-# Check mode (exit 1 if any file would change)
+## Usage
+
+Format files in-place:
+
+```bash
+rstformat file.rst dir/
+```
+
+Check mode (exit 1 if any file would change):
+
+```bash
 rstformat --check file.rst
+```
 
-# Show diff without writing
+Show unified diff without writing:
+
+```bash
 rstformat --diff file.rst
+```
 
-# Read from stdin, write to stdout
+Read from stdin, write to stdout:
+
+```bash
 echo "Title\n=====" | rstformat
+```
 
-# Force Windows line endings
-rstformat --line-ending crlf file.rst
+Control output line endings:
 
-# Preserve the original line endings of each file
-rstformat --line-ending auto file.rst
+```bash
+rstformat --line-ending crlf file.rst    # Force Windows (CRLF)
+rstformat --line-ending auto file.rst    # Preserve input style
+```
+
+For all options, run:
+
+```bash
+rstformat --help
 ```
 
 ## Configuration
 
-Add to `pyproject.toml`:
+Create `pyproject.toml` or `.rstfmt.toml` in your project:
 
 ```toml
 [tool.rstformat]
@@ -51,21 +104,32 @@ normalize_section_underlines = true
 trim_trailing_whitespace     = true
 ```
 
-Or create `.rstfmt.toml` in the project root with the same keys (no
-`[tool.rstformat]` wrapper needed).
+rstformat also respects `.editorconfig` for compatible settings:
 
-### `line_ending`
+```ini
+[*.rst]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+```
 
-| Value | Behaviour |
-| ----- | --------- |
-| `"lf"` | Always write Unix line endings (`\n`). Default. |
-| `"crlf"` | Always write Windows line endings (`\r\n`). |
-| `"auto"` | Detect from the input file: use CRLF if CRLF outnumbers bare LF, otherwise LF. |
+For more details, see [DESIGN.md](https://github.com/lextudio/rstformat/blob/master/DESIGN.md).
 
-## Exit codes
+## Documentation
 
-| Code | Meaning |
-| ---- | ------- |
-| 0 | All files are already formatted (or `--check` found no changes). |
-| 1 | `--check` found files that would be reformatted. |
-| 2 | Error (bad arguments, unreadable file, invalid config). |
+- [Design & Architecture](./DESIGN.md) — formatting algorithm, extension API, roadmap
+- [Changelog](./CHANGES.rst) — version history
+- [Security Policy](./SECURITY.md) — supported versions, reporting vulnerabilities
+- [Development Notes](./AGENTS.md) — for contributors and AI agents
+
+## License
+
+Copyright (c) 2026 LeXtudio Inc.
+
+Licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+## Community
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/lextudio/rstformat/issues)
+- **GitHub Discussions**: [Ask questions](https://github.com/lextudio/rstformat/discussions)
+- **Sponsor**: [Support development](https://github.com/sponsors/lextudio)
