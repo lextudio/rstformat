@@ -311,6 +311,53 @@ def test_mixed_ascii_and_wide_chars():
 
 
 # ---------------------------------------------------------------------------
+# Line ending control
+# ---------------------------------------------------------------------------
+
+def test_line_ending_default_is_lf():
+    assert fmt("a\nb\n") == "a\nb\n"
+
+
+def test_line_ending_crlf():
+    s = FormatterSettings(line_ending="crlf")
+    assert fmt("a\nb\n", s) == "a\r\nb\r\n"
+
+
+def test_line_ending_crlf_heading():
+    s = FormatterSettings(line_ending="crlf")
+    result = fmt("Title\n=====\n\nBody.\n", s)
+    assert result == "Title\r\n=====\r\n\r\nBody.\r\n"
+
+
+def test_line_ending_crlf_input_normalized_before_processing():
+    # CRLF input is normalized to LF for processing, then CRLF is re-applied.
+    s = FormatterSettings(line_ending="crlf")
+    assert fmt("a\r\nb\r\n", s) == "a\r\nb\r\n"
+
+
+def test_line_ending_auto_detects_crlf():
+    s = FormatterSettings(line_ending="auto")
+    # Input is predominantly CRLF.
+    assert fmt("a\r\nb\r\n", s) == "a\r\nb\r\n"
+
+
+def test_line_ending_auto_detects_lf():
+    s = FormatterSettings(line_ending="auto")
+    assert fmt("a\nb\n", s) == "a\nb\n"
+
+
+def test_line_ending_auto_mixed_prefers_majority():
+    s = FormatterSettings(line_ending="auto")
+    # 2 CRLF vs 1 LF → CRLF wins.
+    assert fmt("a\r\nb\r\nc\n", s) == "a\r\nb\r\nc\r\n"
+
+
+def test_line_ending_invalid_raises():
+    with pytest.raises(ValueError, match="line_ending"):
+        FormatterSettings(line_ending="cr")
+
+
+# ---------------------------------------------------------------------------
 # Settings validation — abort on invalid config
 # ---------------------------------------------------------------------------
 

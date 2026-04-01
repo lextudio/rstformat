@@ -100,5 +100,7 @@ def load_settings(
         settings.normalize_section_underlines = bool(table["normalize_section_underlines"])
     if "trim_trailing_whitespace" in table:
         settings.trim_trailing_whitespace = bool(table["trim_trailing_whitespace"])
+    if "line_ending" in table:
+        settings.line_ending = str(table["line_ending"])
 
     return settings

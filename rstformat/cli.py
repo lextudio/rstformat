@@ -54,6 +54,12 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
     )
     parser.add_argument(
+        "--line-ending",
+        choices=["lf", "crlf", "auto"],
+        dest="line_ending",
+        help="Output line ending: lf (default), crlf, or auto (detect from input).",
+    )
+    parser.add_argument(
         "--max-consecutive-blank-lines",
         metavar="N",
         type=int,
@@ -94,6 +100,8 @@ def _apply_overrides(settings: FormatterSettings, args: argparse.Namespace) -> N
         settings.normalize_section_underlines = args.normalize_section_underlines
     if args.trim_trailing_whitespace is not None:
         settings.trim_trailing_whitespace = args.trim_trailing_whitespace
+    if args.line_ending is not None:
+        settings.line_ending = args.line_ending
 
 
 def _format_stdin(settings: FormatterSettings, args: argparse.Namespace) -> int:

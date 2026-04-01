@@ -18,10 +18,14 @@ class FormatterError(Exception):
     """Raised when the formatter encounters an unrecoverable problem."""
 
 
+_VALID_LINE_ENDINGS = ("lf", "crlf", "auto")
+
+
 @dataclass
 class FormatterSettings:
     adornments: str = DEFAULT_ADORNMENTS
     insert_final_newline: bool = True
+    line_ending: str = "lf"
     max_consecutive_blank_lines: int = 2
     normalize_section_spacing: bool = True
     normalize_section_underlines: bool = True
@@ -34,6 +38,11 @@ class FormatterSettings:
             raise ValueError(
                 "max_consecutive_blank_lines must be >= 0, "
                 f"got {self.max_consecutive_blank_lines}"
+            )
+        if self.line_ending not in _VALID_LINE_ENDINGS:
+            raise ValueError(
+                f"line_ending must be one of {_VALID_LINE_ENDINGS}, "
+                f"got {self.line_ending!r}"
             )
 
 
@@ -56,6 +65,13 @@ def _compute_width(text: str) -> int:
 
 def _normalize_eol(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _detect_line_ending(text: str) -> str:
+    """Return ``"crlf"`` if CRLF outnumbers bare LF in *text*, else ``"lf"``."""
+    crlf = text.count("\r\n")
+    lf = text.count("\n") - crlf
+    return "crlf" if crlf > lf else "lf"
 
 
 def _is_blank(line: str) -> bool:
@@ -156,6 +172,13 @@ def format_restructuredtext(
     if settings is None:
         settings = FormatterSettings()
 
+    eol = (
+        "\r\n"
+        if settings.line_ending == "crlf"
+        or (settings.line_ending == "auto" and _detect_line_ending(text) == "crlf")
+        else "\n"
+    )
+
     normalized = _normalize_eol(text)
     had_trailing_newline = normalized.endswith("\n")
     lines = normalized.split("\n")
@@ -238,7 +261,7 @@ def format_restructuredtext(
     while output and _is_blank(output[-1]):
         output.pop()
 
-    result = "\n".join(output)
+    result = eol.join(output)
     if settings.insert_final_newline:
-        result += "\n"
+        result += eol
     return result
