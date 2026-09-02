@@ -105,7 +105,7 @@ def _apply_overrides(settings: FormatterSettings, args: argparse.Namespace) -> N
 
 
 def _format_stdin(settings: FormatterSettings, args: argparse.Namespace) -> int:
-    original = sys.stdin.read()
+    original = sys.stdin.buffer.read().decode('utf-8')
     formatted = format_restructuredtext(original, settings)
 
     if args.check:
@@ -127,7 +127,7 @@ def _format_stdin(settings: FormatterSettings, args: argparse.Namespace) -> int:
             sys.stdout.writelines(diff)
         return 0
 
-    sys.stdout.write(formatted)
+    sys.stdout.buffer.write(formatted.encode("utf-8"))
     return 0
 
 
