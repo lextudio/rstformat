@@ -1,3 +1,13 @@
+Revision 0.1.1, released on Nov 21, 2026
+-----------------------------------------
+
+- Read stdin and write stdout as UTF-8 regardless of the console encoding,
+  fixing incorrect section underline lengths for CJK text on Windows (#1).
+- Emit ``--diff`` output as UTF-8.
+- Report invalid UTF-8 stdin with a clear error instead of a traceback.
+- Add CLI encoding regression tests.
+- Add GitHub Actions CI for Linux, macOS, and Windows.
+
 Revision 0.1.0, released on Apr 01, 2026
 -----------------------------------------
 
