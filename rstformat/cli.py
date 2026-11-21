@@ -13,6 +13,15 @@ from .config import load_settings
 from .formatter import FormatterSettings, format_restructuredtext
 
 
+def _write_stdout(text: str) -> None:
+    """Write text to stdout as UTF-8, independent of the console encoding."""
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is not None:
+        buffer.write(text.encode("utf-8"))
+    else:  # pragma: no cover - stdout replaced by an embedder
+        sys.stdout.write(text)
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="rstformat",
@@ -105,7 +114,12 @@ def _apply_overrides(settings: FormatterSettings, args: argparse.Namespace) -> N
 
 
 def _format_stdin(settings: FormatterSettings, args: argparse.Namespace) -> int:
-    original = sys.stdin.buffer.read().decode('utf-8')
+    try:
+        original = sys.stdin.buffer.read().decode("utf-8")
+    except UnicodeDecodeError as exc:
+        print(f"error: stdin is not valid UTF-8: {exc}", file=sys.stderr)
+        return 2
+
     formatted = format_restructuredtext(original, settings)
 
     if args.check:
@@ -124,10 +138,10 @@ def _format_stdin(settings: FormatterSettings, args: argparse.Namespace) -> int:
             )
         )
         if diff:
-            sys.stdout.writelines(diff)
+            _write_stdout("".join(diff))
         return 0
 
-    sys.stdout.buffer.write(formatted.encode("utf-8"))
+    _write_stdout(formatted)
     return 0
 
 
@@ -155,7 +169,7 @@ def _format_file(
                 tofile=f"{path} (formatted)",
             )
         )
-        sys.stdout.writelines(diff)
+        _write_stdout("".join(diff))
 
     if not args.check and not args.diff and changed:
         path.write_text(formatted, encoding="utf-8")
